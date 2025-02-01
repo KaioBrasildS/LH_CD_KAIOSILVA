@@ -10,6 +10,7 @@ import nltk
 from nltk.corpus import stopwords
 from sklearn.metrics import r2_score, mean_absolute_error
 from timeseriesmetrics import theil
+from sklearn.model_selection import GridSearchCV
 
 
 class Plot:
@@ -191,7 +192,26 @@ class Modelling:
         
         return df
 
-    def print_R2_validation(self,y_val, y_val_pred):
+
+    def train_and_evaluate_with_gridsearch(self, model, grid_search, X_train, y_train, X_val, y_val, X_test):
+        grid_search.fit(X_train, y_train)
+        best_params = grid_search.best_params_
+        
+        # Treinar o modelo com os melhores hiperparâmetros
+        best_model = model.__class__(**best_params)
+        best_model.fit(X_train, y_train)
+        
+        # Avaliação no conjunto de validação
+        y_val_pred = best_model.predict(X_val)
         r2_val = r2_score(y_val, y_val_pred)
         print("-" * 30 + "Métricas de R2 para o modelo" + "-" * 30)
         print(f"R² para o conjunto de validação: {r2_val:.4f}")
+
+        # Previsão no conjunto de teste
+        y_test_pred = best_model.predict(X_test)
+        
+        # Computar resíduos e métricas de acurácia
+        self.Modelling.ResidualForModels(models=[grid_search.best_estimator_], y_pred=y_test_pred)
+        self.Modelling.computeAccuracyModels(models=[grid_search.best_estimator_], y_pred=y_test_pred)
+
+        return best_model, grid_search.best_estimator_
