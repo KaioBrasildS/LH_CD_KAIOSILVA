@@ -204,7 +204,7 @@ class Modelling:
         })
         
         print(" --------------------------- Error Metrics for Models --------------------------- ") 
-        print(df.sort_values(by='MSE', ascending=True))
+        print(df)
 
         return df  # Returning the DataFrame for further use
 
