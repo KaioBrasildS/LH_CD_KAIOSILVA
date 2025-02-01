@@ -187,10 +187,11 @@ class Modelling:
             'R2': self.models_R2,
             'theil': self.models_theil
         })
-        print(" " * 30 + "Métricas de erro para os modelos" + " " * 30)
-        print(df)
+        print("-" * 30 + "Métricas de erro para os modelos" + "-" * 30)
+        
         return df
 
-    def print_R2_validation(y_val, y_val_pred):
+    def print_R2_validation(self,y_val, y_val_pred):
         r2_val = r2_score(y_val, y_val_pred)
+        print("-" * 30 + "Métricas de R2 para o modelo" + "-" * 30)
         print(f"R² para o conjunto de validação: {r2_val:.4f}")
