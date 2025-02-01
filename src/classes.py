@@ -150,3 +150,61 @@ class Auxiliaries:
 
             return df_plot  # Return the DataFrame with words and average prices
 
+
+
+class Modelling:
+    def __init__(self):
+        """
+        Class constructor that initializes necessary attributes.
+        """
+        self.models_label_r = []
+        self.df_test = pd.DataFrame()
+        
+        self.models_label = []
+        self.models_R2 = []
+        self.models_MAE = []
+        self.models_theil = []
+
+    def ResidualForModels(self, models, y_pred): 
+        """
+        Store residual predictions for different models.
+        """
+        for model in models:
+            formalism = type(model).__name__
+            self.models_label_r.append(formalism)
+            self.df_test[formalism] = y_pred  # Assuming y_pred is correctly formatted
+
+        return self.df_test
+
+    def computeAccuracyModels(self, models, y_pred, y_test): 
+        """
+        Compute and display accuracy metrics (MSE, MAE) for different models.
+        """
+        self.models_label
+        self.models_R2
+        self.models_MAE
+        self.models_theil
+        
+        for model in models:
+            formalism = type(model).__name__
+            self.models_label.append(formalism)
+
+            # Compute error metrics
+            
+            self.models_MAE.append(mean_absolute_error(y_true=y_test.values.ravel(), y_pred=y_pred))
+            self.models_R2.append(r2_score(y_true=y_test.values.ravel(), y_pred=y_pred))
+            self.models_theil.append(theil(y_true=y_test.values.ravel(), y_pred=y_pred))
+
+        # Create DataFrame with metrics
+        df = pd.DataFrame({
+            'model': self.models_label, 
+            'MAE': self.models_MAE,
+            'R2': self.models_R2,
+            'theil': self.models_theil
+        })
+        
+        print(" --------------------------- Error Metrics for Models --------------------------- ") 
+        print(df.sort_values(by='MSE', ascending=True))
+
+        return df  # Returning the DataFrame for further use
+
