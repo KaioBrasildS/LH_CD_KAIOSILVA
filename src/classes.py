@@ -189,11 +189,11 @@ class Modelling:
             'theil': self.models_theil
         })
         print("-" * 30 + "Métricas de erro para os modelos" + "-" * 30)
-        
+        print(df)
         return df
 
 
-    def train_and_evaluate_with_gridsearch(self, model, grid_search, X_train, y_train, X_val, y_val, X_test):
+    def train_and_evaluate_with_gridsearch(self, model, grid_search, X_train, y_train, X_val, y_val, X_test,y_test):
         grid_search.fit(X_train, y_train)
         best_params = grid_search.best_params_
         
@@ -206,12 +206,12 @@ class Modelling:
         r2_val = r2_score(y_val, y_val_pred)
         print("-" * 30 + "Métricas de R2 para o modelo" + "-" * 30)
         print(f"R² para o conjunto de validação: {r2_val:.4f}")
-
+        print("\n")
         # Previsão no conjunto de teste
         y_test_pred = best_model.predict(X_test)
         
         # Computar resíduos e métricas de acurácia
-        self.Modelling.ResidualForModels(models=[grid_search.best_estimator_], y_pred=y_test_pred)
-        self.Modelling.computeAccuracyModels(models=[grid_search.best_estimator_], y_pred=y_test_pred)
+        self.ResidualForModels(models=[best_model], y_pred=y_test_pred)
+        self.computeAccuracyModels(models=[best_model], y_pred=y_test_pred,y_test=y_test)
 
         return best_model, grid_search.best_estimator_
