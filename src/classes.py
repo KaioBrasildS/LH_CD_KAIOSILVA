@@ -202,6 +202,13 @@ class Modelling:
         grid_search.fit(X_train, y_train)
         best_params = grid_search.best_params_
         
+            # Print the best hyperparameters
+        print("-" * 30 + "Melhores Hyperparametros" + "-" * 30)
+        for param, value in best_params.items():
+            print(f"{param}: {value}")
+        print("-" * 80)
+
+        
         # Train the model with the best hyperparameters
         best_model = model.__class__(**best_params)
         best_model.fit(X_train, y_train)
