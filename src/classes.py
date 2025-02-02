@@ -192,26 +192,33 @@ class Modelling:
         print(df)
         return df
 
-
-    def train_and_evaluate_with_gridsearch(self, model, grid_search, X_train, y_train, X_val, y_val, X_test,y_test):
+    def train_and_evaluate_with_gridsearch(
+        self, model, grid_search, X_train, y_train,
+        X_val, y_val, X_test, y_test
+    ):
+        """
+        Trains and evaluates a model using GridSearch.
+        """
         grid_search.fit(X_train, y_train)
         best_params = grid_search.best_params_
         
-        # Treinar o modelo com os melhores hiperparâmetros
+        # Train the model with the best hyperparameters
         best_model = model.__class__(**best_params)
         best_model.fit(X_train, y_train)
         
-        # Avaliação no conjunto de validação
+        # Evaluate on the validation set
         y_val_pred = best_model.predict(X_val)
         r2_val = r2_score(y_val, y_val_pred)
-        print("-" * 30 + "Métricas de R2 para o modelo" + "-" * 30)
-        print(f"R² para o conjunto de validação: {r2_val:.4f}")
-        print("\n")
-        # Previsão no conjunto de teste
+        print("-" * 30 + "R2 Metrics for the Model" + "-" * 30)
+        print(f"R² for the validation set: {r2_val:.4f}\n")
+        
+        # Predict on the test set
         y_test_pred = best_model.predict(X_test)
         
-        # Computar resíduos e métricas de acurácia
+        # Compute residuals and accuracy metrics
         self.ResidualForModels(models=[best_model], y_pred=y_test_pred)
-        self.computeAccuracyModels(models=[best_model], y_pred=y_test_pred,y_test=y_test)
-
+        self.computeAccuracyModels(
+            models=[best_model], y_pred=y_test_pred, y_test=y_test
+        )
+        
         return best_model, grid_search.best_estimator_
