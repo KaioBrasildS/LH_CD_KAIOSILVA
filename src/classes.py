@@ -89,18 +89,6 @@ class Plot:
         plt.tight_layout()
         plt.show()
 
-        # Calcula os quantis
-        quantis = data[y_col].quantile([0, 0.25, 0.5, 0.75, 1]).to_dict()
-
-        print("\nValores dos quantis:")
-        print(f"Mínimo (0%): {quantis[0]:.2f} - Menor valor sem outliers")
-        print(f"Primeiro quartil (25%): {quantis[0.25]:.2f} - 25% dos dados "
-              "estão abaixo deste valor")
-        print(f"Mediana (50%): {quantis[0.5]:.2f} - Valor central dos dados")
-        print(f"Terceiro quartil (75%): {quantis[0.75]:.2f} - 75% dos dados "
-              "estão abaixo deste valor")
-        print(f"Máximo (100%): {quantis[1]:.2f} - Maior valor sem outliers")            
-
     def plot_wordcloud(self, data, text_column, title='Word Cloud',
                        max_words=100, background_color='white'):
         """
