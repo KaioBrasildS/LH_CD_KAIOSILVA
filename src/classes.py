@@ -16,6 +16,13 @@ from wordcloud import WordCloud
 
 class Plot:
     def __init__(self, figsize=(8, 5), palette='coolwarm'):
+        """
+        Initializes the Plotter with given figsize and color palette.
+
+        Parameters:
+        - figsize: Tuple (width, height) for the plot figure size.
+        - palette: Color palette to use for the plot.
+        """
         self.figsize = figsize
         self.palette = palette
 
@@ -24,7 +31,19 @@ class Plot:
             """
             Plots a bar chart and displays either the percentage or absolute 
             values above each bar.
+            
+            Parameters:
+            - data: DataFrame containing the data.
+            - x_col: Column name for the X-axis.
+            - y_col: Column name for the Y-axis.
+            - title: Chart title (default: 'Bar Plot').
+            - xlabel: X-axis label (default: None, uses x_col).
+            - ylabel: Y-axis label (default: None, uses y_col).
+            - rotation: Rotation of the X-axis labels (default: 0).
+            - show_percentage: If True, displays percentages; otherwise,
+            displays absolute values ​​(default: True).
             """
+            
             plt.figure(figsize=self.figsize)
             ax = sns.barplot(x=data[x_col], y=data[y_col], palette=self.palette)
 
@@ -42,22 +61,45 @@ class Plot:
             plt.ylabel(ylabel if ylabel else y_col)
             plt.xticks(rotation=rotation)
             plt.show()
-
+            
     def boxplot(self, data, x_col=None, y_col=None, title='Box Plot',
                 xlabel=None, ylabel=None):
         """
-        Plots a boxplot using instance parameters.
+        Plots a boxplot using the instance parameters and displays the
+        quantile values ​​in the console.
+        
+        Parameters:
+        - data: DataFrame containing the data.
+        - x_col: Column name for the X axis (default: None).
+        - y_col: Column name for the Y axis.
+        - title: Title of the plot (default: 'Box Plot').
+        - xlabel: Label for the X axis (default: None, uses x_col if available).
+        - ylabel: Label for the Y axis (default: None, uses y_col).
         """
         plt.figure(figsize=self.figsize)
+        
         if x_col:
             sns.boxplot(x=data[x_col], y=data[y_col], palette=self.palette)
         else:
             sns.boxplot(y=data[y_col], palette=self.palette)
+
         plt.title(title)
         plt.xlabel(xlabel if xlabel else (x_col if x_col else ''))
         plt.ylabel(ylabel if ylabel else y_col)
         plt.tight_layout()
         plt.show()
+
+        # Calcula os quantis
+        quantis = data[y_col].quantile([0, 0.25, 0.5, 0.75, 1]).to_dict()
+
+        print("\nValores dos quantis:")
+        print(f"Mínimo (0%): {quantis[0]:.2f} - Menor valor sem outliers")
+        print(f"Primeiro quartil (25%): {quantis[0.25]:.2f} - 25% dos dados "
+              "estão abaixo deste valor")
+        print(f"Mediana (50%): {quantis[0.5]:.2f} - Valor central dos dados")
+        print(f"Terceiro quartil (75%): {quantis[0.75]:.2f} - 75% dos dados "
+              "estão abaixo deste valor")
+        print(f"Máximo (100%): {quantis[1]:.2f} - Maior valor sem outliers")            
 
     def plot_wordcloud(self, data, text_column, title='Word Cloud',
                        max_words=100, background_color='white'):
@@ -65,17 +107,23 @@ class Plot:
         Generate and display a word cloud from a specified text column in a
         DataFrame. Also returns a DataFrame with the most common words and
         their frequencies.
+
+        Parameters:
+        - data: DataFrame containing the text data.
+        - text_column: Column name containing the text for the word cloud.
+        - title: Title of the word cloud plot (default: 'Word Cloud').
+        - max_words: Maximum number of words to display in the word cloud
+          (default: 100).
+        - background_color: Background color of the word cloud (default: 'white').
         """
         text = ' '.join(
             data[text_column].dropna().apply(
-                lambda x: x.translate(str.maketrans('', '',
-                string.punctuation)).lower()
+                lambda x: x.translate(str.maketrans('', '', string.punctuation)).lower()
             )
         )
         words = text.split()
         word_counts = Counter(words)
-        df_words = pd.DataFrame(word_counts.items(),
-                                columns=['Word', 'Frequency'])
+        df_words = pd.DataFrame(word_counts.items(), columns=['Word', 'Frequency'])
         df_words = df_words.sort_values(by='Frequency', ascending=False)
         wordcloud = WordCloud(
             max_words=max_words,
@@ -96,6 +144,9 @@ class Auxiliaries:
     def __init__(self, plotter):
         """
         Class constructor that initializes stopwords and other settings.
+
+        Parameters:
+        - plotter: Instance of the Plotter class used for visualizations.
         """
         nltk.download('stopwords')
         self.stop_words = set(stopwords.words('english'))
@@ -106,6 +157,9 @@ class Auxiliaries:
         """
         Predicts the gender based on a given name using the gender_guesser
         library.
+
+        Parameters:
+        - name: The name to predict the gender for.
         """
         if isinstance(name, str):
             first_name = name.split()[0]
@@ -115,11 +169,15 @@ class Auxiliaries:
     def most_common_words(self, data, text_column, max_words=20):
         """
         Identifies the most common words in a text column of a DataFrame.
+
+        Parameters:
+        - data: DataFrame containing the text data.
+        - text_column: Column name containing the text to analyze.
+        - max_words: Maximum number of common words to return (default: 20).
         """
         text = ' '.join(
             data[text_column].dropna().apply(
-                lambda x: x.translate(str.maketrans('', '',
-                string.punctuation)).lower()
+                lambda x: x.translate(str.maketrans('', '', string.punctuation)).lower()
             )
         )
         words = text.split()
@@ -131,6 +189,13 @@ class Auxiliaries:
         """
         Calculate and plot the distribution of average prices for the most
         common words in the property name using the word frequency DataFrame.
+
+        Parameters:
+        - data: DataFrame containing the data to plot.
+        - text_column: Column name containing the text for analysis.
+        - price_column: Column name containing the price values.
+        - df_words: DataFrame with word frequencies.
+        - max_words: Maximum number of words to include in the plot (default: 10).
         """
         common_words = df_words.nlargest(max_words * 2, 'Frequency')
         common_words = common_words['Word'].tolist()
@@ -170,6 +235,10 @@ class Modelling:
     def ResidualForModels(self, models, y_pred):
         """
         Store residual predictions for different models.
+
+        Parameters:
+        - models: List of models to store residuals for.
+        - y_pred: Predicted values from the models.
         """
         for model in models:
             formalism = type(model).__name__
@@ -180,6 +249,11 @@ class Modelling:
     def computeAccuracyModels(self, models, y_pred, y_test):
         """
         Compute and display accuracy metrics (MSE, MAE) for different models.
+
+        Parameters:
+        - models: List of models to compute accuracy for.
+        - y_pred: Predicted values from the models.
+        - y_test: True values for comparison.
         """
         for model in models:
             formalism = type(model).__name__
@@ -200,7 +274,7 @@ class Modelling:
             'R2': self.models_R2,
             'theil': self.models_theil
         })
-        print("-" * 30 + "Métricas de erro para os modelos" + "-" * 30)
+        print("-" * 30 + "Métricas  para o modelo" + "-" * 30)
         print(df)
         return df
 
@@ -210,16 +284,25 @@ class Modelling:
     ):
         """
         Trains and evaluates a model using GridSearch.
+
+        Parameters:
+        - model: The model to train.
+        - grid_search: The grid search object to optimize hyperparameters.
+        - X_train: Training feature data.
+        - y_train: Training target data.
+        - X_val: Validation feature data.
+        - y_val: Validation target data.
+        - X_test: Test feature data.
+        - y_test: Test target data.
         """
         grid_search.fit(X_train, y_train)
         best_params = grid_search.best_params_
         
-            # Print the best hyperparameters
-        print("-" * 30 + "Melhores Hyperparametros" + "-" * 30)
+        # Print the best hyperparameters
+        print("-" * 30 + "Melhores hiperparâmetros" + "-" * 30)
         for param, value in best_params.items():
             print("{}: {}".format(param, value))
         print("-" * 80)
-
         
         # Train the model with the best hyperparameters
         best_model = model.__class__(**best_params)
@@ -228,8 +311,8 @@ class Modelling:
         # Evaluate on the validation set
         y_val_pred = best_model.predict(X_val)
         r2_val = r2_score(y_val, y_val_pred)
-        print("-" * 30 + "R2 Metrics for the Model" + "-" * 30)
-        print("R² for the validation set: {:.2f}\n".format(r2_val))
+        print("-" * 30 + "Métricas de R² para o modelo" + "-" * 30)
+        print("R² para o conjunto de validação: {:.2f}\n".format(r2_val))
         
         # Predict on the test set
         y_test_pred = best_model.predict(X_test)
