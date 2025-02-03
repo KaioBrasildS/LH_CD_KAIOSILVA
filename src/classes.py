@@ -1,16 +1,17 @@
-import matplotlib.pyplot as plt
-import seaborn as sns
-from wordcloud import WordCloud
-import string
-import pandas as pd
-from gender_guesser.detector import Detector
-from collections import Counter
 import re
+import string
+from collections import Counter
+
+import matplotlib.pyplot as plt
 import nltk
+import pandas as pd
+import seaborn as sns
+from gender_guesser.detector import Detector
 from nltk.corpus import stopwords
-from sklearn.metrics import r2_score, mean_absolute_error
+from sklearn.metrics import mean_absolute_error, r2_score
 from timeseriesmetrics import theil
-from sklearn.model_selection import GridSearchCV
+from wordcloud import WordCloud
+
 
 
 class Plot:
@@ -19,17 +20,28 @@ class Plot:
         self.palette = palette
 
     def barplot(self, data, x_col, y_col, title='Bar Plot', xlabel=None,
-                ylabel=None, rotation=0):
-        """
-        Plots a bar chart using instance parameters.
-        """
-        plt.figure(figsize=self.figsize)
-        sns.barplot(x=data[x_col], y=data[y_col], palette=self.palette)
-        plt.title(title)
-        plt.xlabel(xlabel if xlabel else x_col)
-        plt.ylabel(ylabel if ylabel else y_col)
-        plt.xticks(rotation=rotation)
-        plt.show()
+                    ylabel=None, rotation=0, show_percentage=True):
+            """
+            Plots a bar chart and displays either the percentage or absolute 
+            values above each bar.
+            """
+            plt.figure(figsize=self.figsize)
+            ax = sns.barplot(x=data[x_col], y=data[y_col], palette=self.palette)
+
+            total = data[y_col].sum()
+
+            for p in ax.patches:
+                height = p.get_height()
+                label = (f"{(height / total) * 100:.1f}%" if show_percentage 
+                        else f"{height:,.0f}")
+                ax.annotate(label, (p.get_x() + p.get_width() / 2., height),
+                            ha='center', va='bottom', fontsize=12, color='black')
+
+            plt.title(title)
+            plt.xlabel(xlabel if xlabel else x_col)
+            plt.ylabel(ylabel if ylabel else y_col)
+            plt.xticks(rotation=rotation)
+            plt.show()
 
     def boxplot(self, data, x_col=None, y_col=None, title='Box Plot',
                 xlabel=None, ylabel=None):
@@ -205,7 +217,7 @@ class Modelling:
             # Print the best hyperparameters
         print("-" * 30 + "Melhores Hyperparametros" + "-" * 30)
         for param, value in best_params.items():
-            print(f"{param}: {value}")
+            print("{}: {}".format(param, value))
         print("-" * 80)
 
         
@@ -217,7 +229,7 @@ class Modelling:
         y_val_pred = best_model.predict(X_val)
         r2_val = r2_score(y_val, y_val_pred)
         print("-" * 30 + "R2 Metrics for the Model" + "-" * 30)
-        print(f"R² for the validation set: {r2_val:.4f}\n")
+        print("R² for the validation set: {:.2f}\n".format(r2_val))
         
         # Predict on the test set
         y_test_pred = best_model.predict(X_test)
