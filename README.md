@@ -1,6 +1,6 @@
 # Desafio Cientista de Dados Indicium
 ## Nome: Kaio Brasil da Silva
-## Email: bkaio2670@gmail.com
+## Email: kaiobrasil.work@gmail.com
 
 Introdução
 
